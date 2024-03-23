@@ -28,7 +28,7 @@ function renderParties() {
     partyList.appendChild(partyItem);
   });
 }
-
+// added
 // Function to handle form submission and add a new party
 async function addParty(event) {
   event.preventDefault();
