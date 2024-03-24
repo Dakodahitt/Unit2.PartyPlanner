@@ -36,7 +36,7 @@ partyForm.addEventListener('submit', async (event) => {
     const partyData = Object.fromEntries(formData.entries());
 
     try {
-        const response = await fetch('https://fsa-crud-2aa9294fe819.herokuapp.com/api/YOUR_COHORT_NAME/events', {
+        const response = await fetch('https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401_FTB_MT_WEB_PT/events', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -56,7 +56,7 @@ partyList.addEventListener('click', async (event) => {
     if (event.target.classList.contains('delete-btn')) {
         const partyId = event.target.dataset.id;
         try {
-            await fetch(`https://fsa-crud-2aa9294fe819.herokuapp.com/api/YOUR_COHORT_NAME/events/${partyId}`, {
+            await fetch(`https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401_FTB_MT_WEB_PTevents/${partyId}`, {
                 method: 'DELETE'
             });
             fetchParties(); // Refresh party list
