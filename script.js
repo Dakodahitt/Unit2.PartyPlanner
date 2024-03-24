@@ -1,102 +1,70 @@
-const API_URL = 'https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401-FTB-MT-WEB-PT/parties';
+const partyList = document.getElementById('party-list');
+const partyForm = document.getElementById('party-form');
 
-const state = {
-  parties: [],
-};
-
-const partyList = document.querySelector('#party-list');
-
-const addPartyForm = document.querySelector('#addPartyForm');
-addPartyForm.addEventListener('submit', addParty);
-
-async function render() {
-  await getParties();
-  renderParties();
-}
-render();
-
-async function getParties() {
-  try {
-    const response = await fetch(API_URL);
-    const json = await response.json();
-    state.parties = json.data;
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-async function addParty(event) {
-  event.preventDefault();
-
-  await createParty(
-    addPartyForm.partyName.value,
-    addPartyForm.partyDate.value,
-    addPartyForm.partyTime.value,
-    addPartyForm.partyLocation.value,
-    addPartyForm.partyDescription.value
-  );
-}
-
-async function createParty(name, date, time, location, description) {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, date, time, location, description }),
-    });
-    const json = await response.json();
-
-    if (json.error) {
-      throw new Error(json.message);
+// Function to fetch party data from the API
+async function fetchParties() {
+    try {
+        const response = await fetch('https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401_FTB_MT_WEB_PT/events');
+        const { data: parties } = await response.json();
+        displayParties(parties);
+    } catch (error) {
+        console.error('Error fetching parties:', error);
     }
-
-    render();
-  } catch (error) {
-    console.error(error);
-  }
 }
 
-async function deleteParty(id) {
-  try {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: 'DELETE',
+// Function to display parties on the page
+function displayParties(parties) {
+    partyList.innerHTML = '';
+    parties.forEach(party => {
+        const partyItem = document.createElement('div');
+        partyItem.classList.add('party');
+        partyItem.innerHTML = `
+            <h3>${party.name}</h3>
+            <p>Date: ${party.date}</p>
+            <p>Location: ${party.location}</p>
+            <p>Description: ${party.description}</p>
+            <button class="delete-btn" data-id="${party.id}">Delete</button>
+        `;
+        partyList.appendChild(partyItem);
     });
+}
 
-    if (!response.ok) {
-      throw new Error('Party could not be deleted.');
+// Event listener for submitting the party form
+partyForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(partyForm);
+    const partyData = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch('https://fsa-crud-2aa9294fe819.herokuapp.com/api/YOUR_COHORT_NAME/events', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(partyData)
+        });
+        const { data: newParty } = await response.json();
+        fetchParties(); // Refresh party list
+        partyForm.reset();
+    } catch (error) {
+        console.error('Error adding party:', error);
     }
+});
 
-    render();
-  } catch (error) {
-    console.error(error);
-  }
-}
+// Event delegation for delete buttons
+partyList.addEventListener('click', async (event) => {
+    if (event.target.classList.contains('delete-btn')) {
+        const partyId = event.target.dataset.id;
+        try {
+            await fetch(`https://fsa-crud-2aa9294fe819.herokuapp.com/api/YOUR_COHORT_NAME/events/${partyId}`, {
+                method: 'DELETE'
+            });
+            fetchParties(); // Refresh party list
+        } catch (error) {
+            console.error('Error deleting party:', error);
+        }
+    }
+});
 
-function renderParties() {
-  if (!state.parties.length) {
-    partyList.innerHTML = `<li>No parties found.</li>`;
-    return;
-  }
-
-  const partyItems = state.parties.map(party => {
-    const partyItem = document.createElement('li');
-    partyItem.classList.add('party');
-    partyItem.innerHTML = `
-      <h2>${party.name}</h2>
-      <p>Date: ${party.date}</p>
-      <p>Time: ${party.time}</p>
-      <p>Location: ${party.location}</p>
-      <p>Description: ${party.description}</p>
-    `;
-
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete Party';
-    partyItem.appendChild(deleteButton);
-
-    deleteButton.addEventListener('click', () => deleteParty(party.id));
-
-    return partyItem;
-  });
-
-  partyList.replaceChildren(...partyItems);
-}
+// Fetch parties when the page loads
+fetchParties();
