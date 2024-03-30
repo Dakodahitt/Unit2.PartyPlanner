@@ -42,3 +42,15 @@ main {
 #addPartyForm button:hover {
     background-color: #555;
 }
+
+#party-list .party {
+    margin-bottom: 20px; 
+}
+
+#party-list .party p {
+    margin-bottom: 5px; 
+}
+
+#party-list .party p.time {
+    margin-bottom: 10px; 
+}
