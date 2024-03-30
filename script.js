@@ -1,14 +1,21 @@
 const partyList = document.getElementById('party-list');
 const partyForm = document.getElementById('party-form');
+let isFetchingParties = false; // State variable to track if parties are being fetched
 
 // Function to fetch party data from the API
 async function fetchParties() {
+    // Set isFetchingParties to true to indicate that parties are being fetched
+    isFetchingParties = true;
+    
     try {
         const response = await fetch('https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401_FTB_MT_WEB_PT/events');
         const { data: parties } = await response.json();
         displayParties(parties);
     } catch (error) {
         console.error('Error fetching parties:', error);
+    } finally {
+        // Set isFetchingParties to false when party fetching is complete
+        isFetchingParties = false;
     }
 }
 
@@ -32,8 +39,15 @@ function displayParties(parties) {
 // Event listener for submitting the party form
 partyForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (isFetchingParties) {
+        // If parties are currently being fetched, prevent form submission
+        return;
+    }
     const formData = new FormData(partyForm);
     const partyData = Object.fromEntries(formData.entries());
+    
+    // Remove the "time" field if it exists
+    delete partyData.time;
 
     try {
         const response = await fetch('https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401_FTB_MT_WEB_PT/events', {
@@ -56,7 +70,7 @@ partyList.addEventListener('click', async (event) => {
     if (event.target.classList.contains('delete-btn')) {
         const partyId = event.target.dataset.id;
         try {
-            await fetch(`https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401_FTB_MT_WEB_PTevents/${partyId}`, {
+            await fetch(`https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401_FTB_MT_WEB_PT/events/${partyId}`, {
                 method: 'DELETE'
             });
             fetchParties(); // Refresh party list
