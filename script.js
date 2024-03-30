@@ -44,8 +44,13 @@ partyForm.addEventListener('submit', async (event) => {
         return;
     }
     const formData = new FormData(partyForm);
-    const partyData = Object.fromEntries(formData.entries());
-    
+    const partyData = {
+        name: formData.get('name'), 
+        date: new Date(formData.get('date')).toISOString(), // Ensure date is in ISO-8601 format
+        location: formData.get('location'),
+        description: formData.get('description')
+    };
+
     // Remove the "time" field if it exists
     delete partyData.time;
 
@@ -57,9 +62,13 @@ partyForm.addEventListener('submit', async (event) => {
             },
             body: JSON.stringify(partyData)
         });
-        const { data: newParty } = await response.json();
-        fetchParties(); // Refresh party list
-        partyForm.reset();
+        const responseData = await response.json();
+        if (responseData.success) {
+            fetchParties(); // Refresh party list only if the request was successful
+            partyForm.reset();
+        } else {
+            console.error('Error adding party:', responseData.error.message);
+        }
     } catch (error) {
         console.error('Error adding party:', error);
     }
