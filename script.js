@@ -31,12 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="date">Date: ${party.date}</p>
                 <p>Location: ${party.location}</p>
                 <p>Description: ${party.description}</p>
+                <button class="delete-btn" data-id="${party.id}">Delete</button> <!-- Add delete button -->
             `;
             partyList.appendChild(partyItem);
         });
 
         // Format dates after parties are displayed
         formatPartyDates();
+
+        // Add event listener for delete buttons
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const partyId = button.dataset.id;
+                try {
+                    await fetch(`https://fsa-crud-2aa9294fe819.herokuapp.com/api/2401_FTB_MT_WEB_PT/events/${partyId}`, {
+                        method: 'DELETE'
+                    });
+                    fetchParties(); // Refresh party list
+                } catch (error) {
+                    console.error('Error deleting party:', error);
+                }
+            });
+        });
     }
 
     // Format party dates using localized date format
